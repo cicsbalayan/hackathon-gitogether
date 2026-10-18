@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { ComponentType } from "react"
 import {
   motion,
@@ -76,6 +76,7 @@ export default function ExperienceLanding({
 }: Props) {
   const merchant = audience === "merchant"
   const reduce = useReducedMotion()
+  const [customerHeroPhase, setCustomerHeroPhase] = useState(reduce ? 2 : 0)
 
   const mosaicRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
@@ -104,63 +105,79 @@ export default function ExperienceLanding({
     onPrimary()
   }
 
+  useEffect(() => {
+    if (merchant || reduce) {
+      setCustomerHeroPhase(2)
+      return
+    }
+
+    const stackTimer = window.setTimeout(() => setCustomerHeroPhase(1), 900)
+    const scatterTimer = window.setTimeout(() => setCustomerHeroPhase(2), 2200)
+
+    return () => {
+      window.clearTimeout(stackTimer)
+      window.clearTimeout(scatterTimer)
+    }
+  }, [merchant, reduce])
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="experience-landing">
         {/* Centered hero — choreographed mask + blur reveal */}
         <motion.section
-          className="landing-hero-centered"
+          className={merchant ? "landing-hero-centered" : "landing-hero-centered landing-customer-hero-section"}
           variants={heroParent}
           initial="hidden"
           animate="show"
         >
-          <div className="landing-copy-centered">
-            <motion.span variants={rise} className="eyebrow">
-              {merchant ? "FORMA FOR RETAILERS" : "A MORE PERSONAL WAY TO SHOP"}
-            </motion.span>
-            <h1 aria-label={merchant ? "Your inventory. More possibilities." : "One piece. Your whole look."}>
-              <span className="mask" aria-hidden="true">
-                <motion.span variants={lineMask}>
-                  {merchant ? "Your inventory." : "One piece."}
-                </motion.span>
-              </span>
-              <span className="mask" aria-hidden="true">
-                <motion.span variants={lineMask}>
-                  {merchant ? "More possibilities." : "Your whole look."}
-                </motion.span>
-              </span>
-            </h1>
-            <motion.p variants={rise}>
-              {merchant
-                ? "Connect your store's catalogue, keep stock current, and help customers discover what belongs together."
-                : "An outfit starts with you. Choose a piece, explore the possibilities, and build a look that feels like your own."}
-            </motion.p>
-            <motion.div variants={rise} className="landing-actions-centered">
-              <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={springTap}>
-                <Button onClick={primary} className="h-11 px-6">
-                  {merchant ? "Configure your store" : "Build my outfit"}
-                  <ArrowRight className="size-4" />
-                </Button>
-              </motion.span>
-              {onSecondary && (
+          {merchant ? (
+            <div className="landing-copy-centered">
+              <motion.span variants={rise} className="eyebrow">FORMA FOR RETAILERS</motion.span>
+              <h1 aria-label="Your inventory. More possibilities.">
+                <span className="mask" aria-hidden="true"><motion.span variants={lineMask}>Your inventory.</motion.span></span>
+                <span className="mask" aria-hidden="true"><motion.span variants={lineMask}>More possibilities.</motion.span></span>
+              </h1>
+              <motion.p variants={rise}>Connect your store's catalogue, keep stock current, and help customers discover what belongs together.</motion.p>
+              <motion.div variants={rise} className="landing-actions-centered">
                 <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={springTap}>
-                  <Button onClick={onSecondary} variant="outline" className="h-11 px-6">
-                    {merchant ? "Open overview" : "Style a single piece"}
-                  </Button>
+                  <Button onClick={primary} className="h-11 px-6">Configure your store<ArrowRight className="size-4" /></Button>
                 </motion.span>
-              )}
-            </motion.div>
-            <motion.span variants={rise} className="landing-caption">
-              {merchant
-                ? "Read-only connections. Your retailer remains in control."
-                : "Start with one piece. The builder recommends the rest."}
-            </motion.span>
-          </div>
+                {onSecondary && (
+                  <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={springTap}>
+                    <Button onClick={onSecondary} variant="outline" className="h-11 px-6">Open overview</Button>
+                  </motion.span>
+                )}
+              </motion.div>
+              <motion.span variants={rise} className="landing-caption">Read-only connections. Your retailer remains in control.</motion.span>
+            </div>
+          ) : (
+            <div className={`landing-copy-centered landing-customer-hero landing-customer-hero-phase-${customerHeroPhase}`}>
+              <h1 aria-label="One piece. Your whole look.">
+                <span className="mask" aria-hidden="true"><motion.span variants={lineMask}>One piece.</motion.span></span>
+                <span className="mask" aria-hidden="true"><motion.span variants={lineMask}>Your whole look.</motion.span></span>
+              </h1>
+              <div className="landing-hero-photo-stack" aria-label="Collection highlights">
+                {[model1, model2, model3, model4].map((model, index) => (
+                  <figure className={`landing-hero-photo-card landing-hero-photo-card-${index + 1}`} key={model}>
+                    <img src={model} alt="" />
+                  </figure>
+                ))}
+              </div>
+              <div className="landing-customer-hero-copy">
+                <p>An outfit starts with you. Choose a piece, explore the possibilities, and build a look that feels like your own.</p>
+                <div className="landing-actions-centered">
+                  <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={springTap}>
+                    <Button onClick={primary} className="h-11 px-6">Build my outfit<ArrowRight className="size-4" /></Button>
+                  </motion.span>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.section>
 
         {/* Photo mosaic — staggered parallax columns */}
         <section
-          className={merchant ? "landing-mosaic" : "landing-mosaic landing-mosaic-four"}
+          className={merchant ? "landing-mosaic" : "landing-mosaic landing-mosaic-four landing-customer-mosaic"}
           aria-label={merchant ? "Store highlights" : "Collection highlights"}
           ref={mosaicRef}
         >
