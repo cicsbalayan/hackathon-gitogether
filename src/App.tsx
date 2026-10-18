@@ -246,7 +246,7 @@ export default function App() {
         <main>
           <div className={`page-heading ${adminPage === "home" ? "overview-heading" : ""}`}>
             <div>
-              <Heading level={1}>{adminPage === "home" ? "Dashboard" : "Inventory dashboard"}</Heading>
+              <Heading level={1}>{adminPage === "home" ? "Dashboard" : "Inventory"}</Heading>
             </div>
           </div>
           {adminPage === "home" ? (
