@@ -25,9 +25,7 @@ const ABOUT: { title: string; body: string }[] = [
 const TEAM: { name?: string; role?: string }[] = [{}, {}, {}, {}, {}]
 
 const LINKS: { label: string; href?: string }[] = [
-  { label: "GitHub" },
-  { label: "Live demo" },
-  { label: "Presentation" },
+  { label: "GitHub", href: "https://github.com/cicsbalayan/hackathon-gitogether" },
 ]
 
 export default function ProjectLanding({ onStartBuilder }: Props) {
@@ -47,13 +45,17 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-about-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">ABOUT</span>
           <h2 id="landing-about-title">About Forma</h2>
         </div>
-        <div className="landing-about-grid">
-          {ABOUT.map((card) => (
+        <div className="landing-about-stack">
+          {ABOUT.map((card, index) => (
             <article key={card.title} className="landing-info-card">
-              <h3>{card.title}</h3>
+              <div className="landing-info-card-heading">
+                <span className="landing-info-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3>{card.title}</h3>
+              </div>
               <p>{card.body}</p>
             </article>
           ))}
@@ -66,7 +68,6 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-team-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">TEAM</span>
           <h2 id="landing-team-title">Meet the team</h2>
         </div>
         <div className="landing-team-grid">
@@ -88,7 +89,6 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-links-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">LINKS</span>
           <h2 id="landing-links-title">Project links</h2>
         </div>
         <div className="landing-links-grid">
@@ -101,9 +101,14 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <span className="landing-link-icon"><Icon name="link" /></span>
-                <strong>{link.label}</strong>
-                <small>Open link</small>
+                <span className="landing-link-card-top">
+                  <span className="landing-link-icon"><Icon name="link" /></span>
+                  <span className="landing-link-arrow" aria-hidden="true"><Icon name="arrow" /></span>
+                </span>
+                <span className="landing-link-card-copy">
+                  <strong>{link.label}</strong>
+                  <small>cicsbalayan/hackathon-gitogether</small>
+                </span>
               </a>
             ) : (
               <div key={link.label} className="landing-placeholder-card" aria-disabled="true">
