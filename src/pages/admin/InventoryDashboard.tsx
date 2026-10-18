@@ -88,7 +88,9 @@ export default function InventoryDashboard({
     if (api.deleteInventoryProduct(sku)) setConfirmRemove(null)
   }
   const applyBundle = (incoming: Product[]) => {
-    if (!api.applyCatalogue(incoming, "AI")) return false
+    const known = new Set(products.map((product) => product.sku))
+    const added = incoming.filter((product) => !known.has(product.sku))
+    if (!api.applyCatalogue([...products, ...added], "AI")) return false
     closeBundle()
     return true
   }
