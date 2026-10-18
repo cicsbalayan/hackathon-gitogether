@@ -6,6 +6,7 @@ export function Icon({ name }: { name: string }) {
     settings: "M4 7h16 M4 17h16 M8 4v6 M16 14v6",
     edit: "M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3 M14.5 7.5l2 2",
     arrow: "M5 12h14 m-5-5 5 5-5 5",
+    airplane: "M21 3 3 10.5l7.5 2.5L13 21l3.5-7.5L21 3Z M10.5 13 21 3",
     upload: "M12 16V3 m-5 5 5-5 5 5 M4 14v6h16v-6",
     check: "m5 12 4 4L19 6",
     close: "m6 6 12 12 M6 18 18 6",
