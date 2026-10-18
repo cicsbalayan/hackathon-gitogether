@@ -1,13 +1,9 @@
-
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
   "rewrites": [
     {
-      "source": "/(.*)"
+      "source": "/amd-cloud/:path*",
+      "destination": "https://developer.amd.com.cn/radeon/:path*"
     }
   ]
 }
