@@ -4,6 +4,7 @@ import { Icon } from "@/components/Icon"
 import { initials } from "@/lib/session"
 import jasperPhoto from "@/assets/Jasper.jpg"
 import iverenePhoto from "@/assets/Iverene.jpg"
+import jareyPhoto from "@/assets/Jarey.jpg"
 import teamData from "@/data/team.json"
 
 type Props = {
@@ -29,6 +30,7 @@ const ABOUT: { title: string; body: string }[] = [
 const TEAM_IMAGES: Record<string, string> = {
   Jasper: jasperPhoto,
   Iverene: iverenePhoto,
+  Jarey: jareyPhoto,
 }
 
 const TEAM = teamData.map((member) => ({
