@@ -5,6 +5,8 @@ import { initials } from "@/lib/session"
 import jasperPhoto from "@/assets/Jasper.jpg"
 import iverenePhoto from "@/assets/Iverene.jpg"
 import jareyPhoto from "@/assets/Jarey.jpg"
+import zyraPhoto from "@/assets/Zyra.jpg"
+import patrickPhoto from "@/assets/Patrick.webp"
 import teamData from "@/data/team.json"
 
 type Props = {
@@ -31,6 +33,8 @@ const TEAM_IMAGES: Record<string, string> = {
   Jasper: jasperPhoto,
   Iverene: iverenePhoto,
   Jarey: jareyPhoto,
+  Zyra: zyraPhoto,
+  Patrick: patrickPhoto,
 }
 
 const TEAM = teamData.map((member) => ({
