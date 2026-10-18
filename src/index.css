@@ -36,6 +36,7 @@
 }
 .landing-actions-centered { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; }
 .landing-actions-centered > span { display: inline-flex; }
+.landing-actions-centered button:hover { background-color: var(--color-neutral-900); }
 .mask { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 .mask > span { display: block; will-change: transform; }
 .landing-mosaic > * { will-change: transform; }
