@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux"
 import { Button, Heading } from "./components/ui"
 import { Icon } from "./components/Icon"
+import LoadingScreen from "./components/LoadingScreen"
 import Footer from "./components/Footer"
 import type { AssistantActions } from "./components/StylistChat"
 import fittingModel from "./assets/fitting-fashion-model.jpg"
@@ -45,9 +46,7 @@ function isProtectedShopRoute(route: string) {
 type AdminPage = "home" | "inventory"
 
 const loadingFallback = (
-  <div className="route-loading" role="status">
-    Loading…
-  </div>
+  <LoadingScreen />
 )
 
 export default function App() {

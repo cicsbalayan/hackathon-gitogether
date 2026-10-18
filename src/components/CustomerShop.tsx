@@ -9,6 +9,7 @@ import type { AssistantActions } from "@/components/StylistChat"
 import { Button, Input } from "@/components/ui"
 import { Icon } from "@/components/Icon"
 import Footer from "@/components/Footer"
+import LoadingScreen from "@/components/LoadingScreen"
 import { useAppDispatch } from "@/lib/hooks"
 import { setCategory as setCategoryAction } from "@/lib/store"
 import type { CartBundle, ShopTab, ShopView } from "@/pages/customer/types"
@@ -481,12 +482,12 @@ export default function CustomerShop({
       />
       <main className="customer-main">
         {tab === "home" && (
-          <Suspense fallback={<div className="import-placeholder" role="status">Loading…</div>}>
+          <Suspense fallback={<LoadingScreen />}>
             <HomePage onStartBuilder={() => { go("collection") }} />
           </Suspense>
         )}
         {tab === "outfits" && (
-          <Suspense fallback={<div className="import-placeholder" role="status">Loading…</div>}>
+          <Suspense fallback={<LoadingScreen />}>
           <OutfitPage
             products={products}
             image={image}
