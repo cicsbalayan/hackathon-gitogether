@@ -1,6 +1,10 @@
+import { useEffect } from "react"
 import ExperienceLanding from "@/components/ExperienceLanding"
 import { Icon } from "@/components/Icon"
 import { initials } from "@/lib/session"
+import jasperPhoto from "@/assets/Jasper.jpg"
+import iverenePhoto from "@/assets/Iverene.jpg"
+import teamData from "@/data/team.json"
 
 type Props = {
   /** Open the outfit builder. */
@@ -22,15 +26,63 @@ const ABOUT: { title: string; body: string }[] = [
   },
 ]
 
-const TEAM: { name?: string; role?: string }[] = [{}, {}, {}, {}, {}]
+const TEAM_IMAGES: Record<string, string> = {
+  Jasper: jasperPhoto,
+  Iverene: iverenePhoto,
+}
+
+const TEAM = teamData.map((member) => ({
+  name: member.name || undefined,
+  role: member.role || undefined,
+  image: member.image ? TEAM_IMAGES[member.image] : undefined,
+}))
 
 const LINKS: { label: string; href?: string }[] = [
-  { label: "GitHub" },
-  { label: "Live demo" },
-  { label: "Presentation" },
+  { label: "GitHub", href: "https://github.com/cicsbalayan/hackathon-gitogether" },
 ]
 
 export default function ProjectLanding({ onStartBuilder }: Props) {
+  useEffect(() => {
+    const cards = document.querySelectorAll<HTMLElement>(".landing-team-card")
+    if (typeof IntersectionObserver === "undefined") {
+      cards.forEach((card) => card.classList.add("is-visible"))
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible")
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15 },
+    )
+    cards.forEach((card) => observer.observe(card))
+    return () => observer.disconnect()
+  }, [])
+  useEffect(() => {
+    const cards = document.querySelectorAll<HTMLElement>(".landing-link-card")
+    if (typeof IntersectionObserver === "undefined") {
+      cards.forEach((card) => card.classList.add("is-visible"))
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible")
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.2 },
+    )
+    cards.forEach((card) => observer.observe(card))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       <section
@@ -47,13 +99,17 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-about-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">ABOUT</span>
           <h2 id="landing-about-title">About Forma</h2>
         </div>
-        <div className="landing-about-grid">
-          {ABOUT.map((card) => (
+        <div className="landing-about-stack">
+          {ABOUT.map((card, index) => (
             <article key={card.title} className="landing-info-card">
-              <h3>{card.title}</h3>
+              <div className="landing-info-card-heading">
+                <span className="landing-info-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3>{card.title}</h3>
+              </div>
               <p>{card.body}</p>
             </article>
           ))}
@@ -66,17 +122,24 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-team-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">TEAM</span>
           <h2 id="landing-team-title">Meet the team</h2>
         </div>
         <div className="landing-team-grid">
           {TEAM.map((member, index) => (
-            <article key={index} className="landing-placeholder-card landing-team-card">
-              <span className="landing-avatar" aria-hidden="true">
-                {member.name ? initials(member.name) : "—"}
-              </span>
-              <strong>{member.name ?? "Name coming soon"}</strong>
-              <small>{member.role ?? "Role TBD"}</small>
+            <article key={index} className="landing-team-card">
+              <div className={`landing-team-photo ${member.image ? "" : "is-placeholder"}`}>
+                {member.image ? (
+                  <img src={member.image} alt="" />
+                ) : (
+                  <span className="landing-avatar" aria-hidden="true">
+                    {member.name ? initials(member.name) : "—"}
+                  </span>
+                )}
+                <div className="landing-team-caption">
+                  <strong>{member.name ?? "Name coming soon"}</strong>
+                  <small>{member.role ?? "Role TBD"}</small>
+                </div>
+              </div>
             </article>
           ))}
         </div>
@@ -88,7 +151,6 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
         aria-labelledby="landing-links-title"
       >
         <div className="landing-section-heading">
-          <span className="eyebrow">LINKS</span>
           <h2 id="landing-links-title">Project links</h2>
         </div>
         <div className="landing-links-grid">
@@ -101,9 +163,14 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <span className="landing-link-icon"><Icon name="link" /></span>
-                <strong>{link.label}</strong>
-                <small>Open link</small>
+                <span className="landing-link-card-top">
+                  <span className="landing-link-icon"><Icon name="link" /></span>
+                  <span className="landing-link-arrow" aria-hidden="true"><Icon name="arrow" /></span>
+                </span>
+                <span className="landing-link-card-copy">
+                  <strong>{link.label}</strong>
+                  <small>cicsbalayan/hackathon-gitogether</small>
+                </span>
               </a>
             ) : (
               <div key={link.label} className="landing-placeholder-card" aria-disabled="true">

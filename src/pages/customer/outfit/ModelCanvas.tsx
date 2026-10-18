@@ -60,7 +60,7 @@ export default function ModelCanvas({
       <img
         loading="lazy"
         decoding="async"
-        className="full-body-model"
+        className={activeModelSrc ? "uploaded-model" : "full-body-model"}
         src={activeModelSrc || image}
         alt={
           activeModelSrc
@@ -76,9 +76,6 @@ export default function ModelCanvas({
         </div>
       )}
       <span className="canvas-label">{label}</span>
-      {!activeModelSrc && (
-        <span className="model-credit">Ola Szkolda / Unsplash</span>
-      )}
       {bundle.length > 0 && (
         <div className="complete-look" aria-label={lookLabel}>
           <strong>
@@ -92,10 +89,14 @@ export default function ModelCanvas({
         </div>
       )}
       {previewState === "loading" && (
-        <div className="inference-skeleton" role="status">
-          <div className="skeleton-block" />
-          <strong>Preparing try-on…</strong>
-          <span>AI garment rendering is not connected.</span>
+        <div className="try-on-loading" role="status" aria-live="polite">
+          <div className="try-on-orb" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <strong>Preparing your try-on…</strong>
+          <span>Building a glass preview of your look.</span>
         </div>
       )}
     </div>

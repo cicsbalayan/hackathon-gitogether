@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux"
 import { Button, Heading } from "./components/ui"
 import { Icon } from "./components/Icon"
+import LoadingScreen from "./components/LoadingScreen"
 import Footer from "./components/Footer"
 import type { AssistantActions } from "./components/StylistChat"
 import fittingModel from "./assets/fitting-fashion-model.jpg"
@@ -45,9 +46,7 @@ function isProtectedShopRoute(route: string) {
 type AdminPage = "home" | "inventory"
 
 const loadingFallback = (
-  <div className="route-loading" role="status">
-    Loading…
-  </div>
+  <LoadingScreen />
 )
 
 export default function App() {
@@ -203,7 +202,7 @@ export default function App() {
         </div>
         <nav id="admin-navigation" aria-label="Admin navigation">
           {([
-            ["home", "Home", "grid"],
+            ["home", "Dashboard", "grid"],
             ["inventory", "Inventory", "catalogue"],
           ] as const).map(([id, label, icon]) => (
             <Button
@@ -247,7 +246,7 @@ export default function App() {
         <main>
           <div className={`page-heading ${adminPage === "home" ? "overview-heading" : ""}`}>
             <div>
-              <Heading level={1}>{adminPage === "home" ? "Home dashboard" : "Inventory dashboard"}</Heading>
+              <Heading level={1}>{adminPage === "home" ? "Dashboard" : "Inventory"}</Heading>
             </div>
           </div>
           {adminPage === "home" ? (

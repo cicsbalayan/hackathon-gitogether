@@ -30,7 +30,7 @@ export default function InventoryDashboard({
 }: Props) {
   const { catalogue, products, sync, classifying } = api
   const [bundleOpen, setBundleOpen] = useState(false)
-  const [inventoryEditor, setInventoryEditor] = useState<Product | null | undefined>(undefined)
+  const [inventoryEditor, setInventoryEditor] = useState<Product | undefined>(undefined)
   const [details, setDetails] = useState<{
     sku: string
     mode: "variants" | "alternatives"
@@ -38,7 +38,6 @@ export default function InventoryDashboard({
   const [cataloguePage, setCataloguePage] = useState(1)
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
   const inventoryTrigger = useRef<HTMLButtonElement | null>(null)
-  const addProductTrigger = useRef<HTMLButtonElement | null>(null)
   const bundleTrigger = useRef<HTMLButtonElement | null>(null)
   const detailsTrigger = useRef<HTMLButtonElement | null>(null)
 
@@ -60,11 +59,9 @@ export default function InventoryDashboard({
   const closeInventoryEditor = () => {
     setInventoryEditor(undefined)
     if (inventoryTrigger.current?.isConnected) inventoryTrigger.current.focus()
-    else addProductTrigger.current?.focus()
   }
-  const openInventoryEditor = (product: Product | null, trigger: HTMLButtonElement) => {
+  const openInventoryEditor = (product: Product, trigger: HTMLButtonElement) => {
     inventoryTrigger.current = trigger
-    if (!product) addProductTrigger.current = trigger
     setInventoryEditor(product)
     setBundleOpen(false)
     setDetails(null)
@@ -91,7 +88,9 @@ export default function InventoryDashboard({
     if (api.deleteInventoryProduct(sku)) setConfirmRemove(null)
   }
   const applyBundle = (incoming: Product[]) => {
-    if (!api.applyCatalogue(incoming, "AI")) return false
+    const known = new Set(products.map((product) => product.sku))
+    const added = incoming.filter((product) => !known.has(product.sku))
+    if (!api.applyCatalogue([...products, ...added], "AI")) return false
     closeBundle()
     return true
   }
@@ -104,9 +103,9 @@ export default function InventoryDashboard({
             <span className="outfit-context-label">Source</span>
             <strong>{sourceLabel}</strong>
             <p>
-              Add products and manage available units by size below, then use
-              “Classify photos” to let AI detect categories, colours and prices
-              straight from product photos.
+              Manage available units by size below, or use “Classify photos”
+              to let AI detect categories, colours and prices straight from
+              product photos.
             </p>
           </div>
         </div>
@@ -149,14 +148,6 @@ export default function InventoryDashboard({
               )}
             </div>
             <Button
-              className="button primary"
-              aria-expanded={inventoryEditor === null}
-              onClick={(event) => openInventoryEditor(null, event.currentTarget)}
-            >
-              <Icon name="plus" />
-              Add product
-            </Button>
-            <Button
               className="button secondary"
               aria-expanded={bundleOpen}
               onClick={(event) => {
@@ -175,9 +166,9 @@ export default function InventoryDashboard({
           createPortal(
             <Suspense fallback={<div className="import-placeholder" role="status">Loading inventory editor…</div>}>
               <div className="inventory-editor-modal" role="presentation" onMouseDown={closeInventoryEditor}>
-                <div className="inventory-editor-dialog" role="dialog" aria-modal="true" aria-label={inventoryEditor ? `Edit ${inventoryEditor.name}` : "Add product"} onMouseDown={(event) => event.stopPropagation()}>
-                  <InventoryEditor key={inventoryEditor?.sku || "new-product"} product={inventoryEditor}
-                    products={products} apiConnected={false} Icon={Icon}
+                <div className="inventory-editor-dialog" role="dialog" aria-modal="true" aria-label={`Edit ${inventoryEditor.name}`} onMouseDown={(event) => event.stopPropagation()}>
+                  <InventoryEditor key={inventoryEditor.sku} product={inventoryEditor}
+                    apiConnected={false} Icon={Icon}
                     onSave={saveInventoryProduct} onDelete={deleteInventoryProduct} onClose={closeInventoryEditor} />
                 </div>
               </div>
@@ -304,7 +295,7 @@ export default function InventoryDashboard({
             <div className="empty">
               {products.length
                 ? `No products match “${query}”. Try a product name or SKU.`
-                : "Your inventory is empty. Add a product or classify product photos to build it."}
+                : "Your inventory is empty. Classify product photos to build it."}
             </div>
           )}
         </div>
@@ -349,7 +340,7 @@ export default function InventoryDashboard({
           <span>
             {catalogue.source !== "None"
               ? "Local catalogue snapshot · browser-tab storage · manual updates"
-              : "Add a product or classify product photos to build your catalogue"}
+              : "Classify product photos to build your catalogue"}
           </span>
           {sync === "error" && (
             <span role="alert">

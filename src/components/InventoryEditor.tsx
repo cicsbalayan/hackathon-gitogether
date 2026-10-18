@@ -6,8 +6,7 @@ import { classificationCategories } from "../lib/classification"
 import type { Product } from "../lib/catalogue"
 
 type Props = {
-  product: Product | null
-  products: Product[]
+  product: Product
   apiConnected: boolean
   Icon: ComponentType<{ name: string }>
   onSave: (product: Product) => boolean
@@ -15,18 +14,18 @@ type Props = {
   onClose: () => void
 }
 
-export default function InventoryEditor({ product, products, apiConnected, Icon, onSave, onDelete, onClose }: Props) {
+export default function InventoryEditor({ product, apiConnected, Icon, onSave, onDelete, onClose }: Props) {
   const panel = useRef<HTMLElement>(null)
-  const [name, setName] = useState(product?.name || "")
-  const [sku, setSku] = useState(product?.sku || "")
-  const [category, setCategory] = useState(product?.category || "Top")
-  const [price, setPrice] = useState(String(product?.price ?? ""))
-  const [color, setColor] = useState(product?.color || "")
-  const [image, setImage] = useState(product?.imageUrl || "")
+  const [name, setName] = useState(product.name || "")
+  const [sku, setSku] = useState(product.sku || "")
+  const [category, setCategory] = useState(product.category || "Top")
+  const [price, setPrice] = useState(String(product.price ?? ""))
+  const [color, setColor] = useState(product.color || "")
+  const [image, setImage] = useState(product.imageUrl || "")
   const [variants, setVariants] = useState(
-    product?.variants
+    product.variants
       ? Object.entries(product.variants).map(([size, stock]) => ({ id: crypto.randomUUID(), size, stock: String(stock) }))
-      : [{ id: crypto.randomUUID(), size: "M", stock: String(product?.stock ?? 0) }],
+      : [{ id: crypto.randomUUID(), size: "M", stock: String(product.stock ?? 0) }],
   )
   const [error, setError] = useState("")
   const [confirmManual, setConfirmManual] = useState(false)
@@ -41,7 +40,6 @@ export default function InventoryEditor({ product, products, apiConnected, Icon,
     const normalizedSku = sku.trim()
     if (!name.trim() || name.trim().length > 200) return setError("Enter a product name of up to 200 characters.")
     if (!/^[A-Za-z0-9][A-Za-z0-9._/-]{0,79}$/.test(normalizedSku)) return setError("Enter a valid product code using letters, numbers, dots, slashes, hyphens or underscores.")
-    if (!product && products.some((p) => p.sku.toLowerCase() === normalizedSku.toLowerCase())) return setError("That product code is already in the inventory. Edit the existing product instead.")
     if (!/^\d+(?:\.\d{1,2})?$/.test(price) || Number(price) > 1000000) return setError("Enter a price from ₱0 to ₱1,000,000 with up to two decimals.")
     if (!variants.length || sizes.some((size) => !/^[A-Z0-9][A-Z0-9 ./_-]{0,15}$/.test(size)) || new Set(sizes).size !== sizes.length) return setError("Provide at least one valid size. Each size must be unique.")
     if (variants.some((variant) => !/^\d+$/.test(variant.stock) || Number(variant.stock) > 1000000) || total > 1000000) return setError("Stock must be a whole number, with no more than 1,000,000 units in total.")
@@ -56,15 +54,15 @@ export default function InventoryEditor({ product, products, apiConnected, Icon,
     if (!onSave(next)) setError("Could not save inventory in this browser. Your previous stock is unchanged.")
   }
   return (
-    <section className="inventory-editor" aria-label={product ? `Edit ${product.name}` : "Add product"} ref={panel} tabIndex={-1}>
+    <section className="inventory-editor" aria-label={`Edit ${product.name}`} ref={panel} tabIndex={-1}>
       <div className="inventory-editor-heading">
-        <Heading level={2}>{product ? "Manage product & stock" : "Add product"}</Heading>
+        <Heading level={2}>Manage product &amp; stock</Heading>
         <Button className="icon-button" aria-label="Close inventory editor" onClick={onClose}><Icon name="close" /></Button>
       </div>
       <Form onSubmit={(event) => { event.preventDefault(); save() }}>
         <div className="inventory-editor-fields">
           <label>Product name<Input value={name} onChange={(event) => setName(event.target.value)} required maxLength={200} /></label>
-          <label>Product code (SKU)<Input value={sku} onChange={(event) => setSku(event.target.value)} required readOnly={Boolean(product)} /></label>
+          <label>Product code (SKU)<Input value={sku} onChange={(event) => setSku(event.target.value)} required readOnly /></label>
           <label>Category<Select value={category} onChange={(event) => setCategory(event.target.value)}>
             {classificationCategories.map((value) => <option key={value}>{value}</option>)}
           </Select></label>
@@ -76,7 +74,7 @@ export default function InventoryEditor({ product, products, apiConnected, Icon,
           <Heading level={3}>Stock by size</Heading>
           <span>{total.toLocaleString("en-PH")} total units</span>
         </div>
-        {product && !product.variants && <p className="inventory-editor-note">This product has no size-level records. Assign its available sizes and quantities below.</p>}
+        {!product.variants && <p className="inventory-editor-note">This product has no size-level records. Assign its available sizes and quantities below.</p>}
         <div className="inventory-variant-list">
           {variants.map((variant, index) => (
             <div className="inventory-variant-row" key={variant.id}>
@@ -97,7 +95,7 @@ export default function InventoryEditor({ product, products, apiConnected, Icon,
           <Button className="button primary" type="submit">Save inventory<Icon name="check" /></Button>
         </div>
       </Form>
-      {product && <div className="inventory-delete">
+      <div className="inventory-delete">
         {confirmDelete ? <>
           <p>Remove this product from your local catalogue? Existing retailer records are not changed.</p>
           <Button className="button secondary" onClick={() => setConfirmDelete(false)}>Keep product</Button>
@@ -105,7 +103,7 @@ export default function InventoryEditor({ product, products, apiConnected, Icon,
             if (!onDelete(product.sku)) setError("Could not remove the product. Your inventory is unchanged.")
           }}>Confirm removal</Button>
         </> : <Button className="text-button" onClick={() => setConfirmDelete(true)}><Icon name="trash" />Remove product</Button>}
-      </div>}
+      </div>
       <p className="inventory-editor-note">Changes are saved in this browser tab and used by the customer builder. Zero stock marks a size unavailable.</p>
     </section>
   )
