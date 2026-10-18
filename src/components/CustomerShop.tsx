@@ -4,7 +4,8 @@ import { productTotal } from "@/lib/catalogue"
 import { compatible, recommendOutfit } from "@/lib/recommend"
 import type { Preferences } from "@/lib/recommend"
 import { recommendOutfitFromPhoto } from "@/lib/photoStylist"
-import { isVisionConfigured } from "@/lib/aiConfig"
+import { recommendOutfitWithAi } from "@/lib/outfitStylist"
+import { isConversationConfigured, isVisionConfigured } from "@/lib/aiConfig"
 import type { AssistantActions } from "@/components/StylistChat"
 import { Button, Input } from "@/components/ui"
 import { Icon } from "@/components/Icon"
@@ -177,6 +178,10 @@ export default function CustomerShop({
   const [collectionPage, setCollectionPage] = useState(1)
   useEffect(() => setCollectionPage(1), [category, products])
   useEffect(() => {
+    if (category !== "All" && !products.some((p) => p.category === category))
+      setCategory("All")
+  }, [category, products])
+  useEffect(() => {
     dispatch(setCategoryAction(category))
   }, [category, dispatch])
   const pendingOutfit = useRef<
@@ -208,6 +213,7 @@ export default function CustomerShop({
     note: string
   }>({ status: "idle", warnings: [], error: "", note: "" })
   const visionConfigured = isVisionConfigured()
+  const conversationConfigured = isConversationConfigured()
   const [cartState, setCart] = useState<StoredCartBundle[]>([])
   // Hot reload can retain bundles created before piece selection was added.
   const cart: CartBundle[] = cartState.map((entry) => ({
@@ -380,38 +386,78 @@ export default function CustomerShop({
     }])
     notify(`${piece.name} added to your cart.`)
   }
-  const runPhotoRecommendation = async () => {
-    if (!activeModelSrc) {
-      notify("Upload a model photo in the fitting studio first.")
+  const runAiRecommendation = async () => {
+    const usePhoto = Boolean(activeModelSrc) && visionConfigured
+    if (!usePhoto && !conversationConfigured) {
+      // No AI endpoint configured: build the look from the selection locally.
+      if (selected.length) {
+        setBundle(selected)
+        setError("")
+        setPhotoReco({
+          status: "idle",
+          warnings: [],
+          error: "",
+          note: "AI styling is not configured, so the look is built from your selected pieces.",
+        })
+      } else {
+        notify("Select a few pieces or upload a model photo to get a recommendation.")
+      }
       return
     }
     setPhotoReco({ status: "loading", warnings: [], error: "", note: "" })
     try {
-      const dataUrl = await toDataUrl(activeModelSrc)
-      const result = await recommendOutfitFromPhoto(products, dataUrl, {
-        preferences: {
-          style: prefs.style,
-          occasion: prefs.occasion,
-          palette: prefs.palette,
-        },
-      })
-      const items = result.items
-        .map((item) => products.find((p) => p.sku === item.sku))
-        .filter((p): p is Product => Boolean(p))
-      setBundle(items)
-      setError("")
-      setPreviewState("idle")
-      clearTimeout(previewTimer.current)
-      setPhotoReco({
-        status: "idle",
-        warnings: result.warnings,
-        error: "",
-        note: result.items.length
-          ? ""
-          : result.reasoning?.trim() ||
-            result.analysis?.trim() ||
-            "The stylist could not build a complete look from the catalogue.",
-      })
+      if (usePhoto && activeModelSrc) {
+        const dataUrl = await toDataUrl(activeModelSrc)
+        const result = await recommendOutfitFromPhoto(products, dataUrl, {
+          preferences: {
+            style: prefs.style,
+            occasion: prefs.occasion,
+            palette: prefs.palette,
+          },
+        })
+        const items = result.items
+          .map((item) => products.find((p) => p.sku === item.sku))
+          .filter((p): p is Product => Boolean(p))
+        setBundle(items)
+        setError("")
+        setPreviewState("idle")
+        clearTimeout(previewTimer.current)
+        setPhotoReco({
+          status: "idle",
+          warnings: result.warnings,
+          error: "",
+          note: result.items.length
+            ? ""
+            : result.reasoning?.trim() ||
+              result.analysis?.trim() ||
+              "The stylist could not build a complete look from the catalogue.",
+        })
+      } else {
+        const result = await recommendOutfitWithAi(products, {
+          preferences: {
+            style: prefs.style,
+            occasion: prefs.occasion,
+            palette: prefs.palette,
+          },
+          anchorSkus: selected.map((p) => p.sku),
+        })
+        const items = result.items
+          .map((item) => products.find((p) => p.sku === item.sku))
+          .filter((p): p is Product => Boolean(p))
+        setBundle(items)
+        setError("")
+        setPreviewState("idle")
+        clearTimeout(previewTimer.current)
+        setPhotoReco({
+          status: "idle",
+          warnings: result.warnings,
+          error: "",
+          note: items.length
+            ? ""
+            : result.reasoning?.trim() ||
+              "The stylist could not build a complete look from the catalogue.",
+        })
+      }
     } catch (cause) {
       setPhotoReco({
         status: "error",
@@ -579,6 +625,8 @@ export default function CustomerShop({
             setPreviewState={setPreviewState}
             previewTimer={previewTimer}
             filtered={filtered}
+            category={category}
+            setCategory={setCategory}
             collectionPage={collectionPage}
             setCollectionPage={setCollectionPage}
             openProduct={openProduct}
@@ -605,7 +653,7 @@ export default function CustomerShop({
             photoReco={photoReco}
             photoConfigured={visionConfigured}
             hasModelPhoto={Boolean(activeModelSrc)}
-            runPhotoRecommendation={runPhotoRecommendation}
+            runAiRecommendation={runAiRecommendation}
             signedIn={Boolean(session)}
             onRequireLogin={requestLoginForFitting}
           />
