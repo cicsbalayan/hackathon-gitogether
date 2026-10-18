@@ -150,3 +150,8 @@ src/assets/model1.jpg -filter -diff -merge -text
 src/assets/model2.jpg -filter -diff -merge -text
 src/assets/model3.jpg -filter -diff -merge -text
 src/assets/model4.jpg -filter -diff -merge -text
+src/assets/Jasper.jpg -filter -diff -merge -text
+src/assets/Iverene.jpg -filter -diff -merge -text
+src/assets/Jarey.jpg -filter -diff -merge -text
+src/assets/Zyra.jpg -filter -diff -merge -text
+src/assets/Patrick.webp -filter -diff -merge -text
