@@ -202,7 +202,7 @@ export default function App() {
         </div>
         <nav id="admin-navigation" aria-label="Admin navigation">
           {([
-            ["home", "Home", "grid"],
+            ["home", "Dashboard", "grid"],
             ["inventory", "Inventory", "catalogue"],
           ] as const).map(([id, label, icon]) => (
             <Button
@@ -246,7 +246,7 @@ export default function App() {
         <main>
           <div className={`page-heading ${adminPage === "home" ? "overview-heading" : ""}`}>
             <div>
-              <Heading level={1}>{adminPage === "home" ? "Home dashboard" : "Inventory dashboard"}</Heading>
+              <Heading level={1}>{adminPage === "home" ? "Dashboard" : "Inventory dashboard"}</Heading>
             </div>
           </div>
           {adminPage === "home" ? (

@@ -1443,6 +1443,15 @@ td { padding-block: var(--space-3); font-size: var(--text-sm); }
   .loading-screen-track span { animation: none; transform: translateX(140%); }
 }
 
+.admin-home-toolbar { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+.admin-home-toolbar h2 { font-size: var(--text-lg); font-weight: 600; letter-spacing: -.3px; }
+.admin-home-toolbar p { margin-top: var(--space-1); color: var(--muted); font-size: var(--text-sm); }
+.admin-manage-inventory { display: flex; width: auto; margin-top: var(--space-4); }
+@media (max-width: 650px) {
+  .admin-home-toolbar { align-items: stretch; flex-direction: column; }
+  .admin-home-toolbar select { width: 100%; }
+}
+
 .fitting-gate { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); max-width: 520px; margin: var(--space-5) auto; padding: var(--space-6); text-align: center; }
 .fitting-gate h2 { font-size: var(--text-lg); }
 .landing-section { scroll-margin-top: calc(var(--header-height) + var(--space-6)); padding-top: var(--space-6); }
