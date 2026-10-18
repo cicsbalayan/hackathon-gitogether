@@ -1379,6 +1379,11 @@ td { padding-block: var(--space-3); font-size: var(--text-sm); }
 .complete-look strong { display: block; font-size: var(--text-xs); font-weight: 600; margin-bottom: var(--space-2); }
 .complete-look > div { display: flex; flex-wrap: wrap; gap: 6px; }
 .complete-chip { font-size: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 4px 9px; }
+/* Garments fitted over the model — positioned by body zone, blended into the photo. */
+.fit-garments { position: absolute; inset: var(--space-5) var(--space-4) calc(var(--space-6) * 3); pointer-events: none; }
+.fit-garment { position: absolute; display: block; }
+.fit-garment img, .fit-garment .garment { display: block; width: 100%; height: auto; object-fit: contain; opacity: .92; filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .28)); mix-blend-mode: multiply; }
+.fit-garment .garment { color: #3a3a3a; }
 /* Pairing graph. */
 .recommended-layout .pairing-graph { grid-column: 1 / -1; }
 .pairing-graph { margin-bottom: var(--space-5); }
