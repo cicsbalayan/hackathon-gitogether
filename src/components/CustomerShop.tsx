@@ -6,6 +6,7 @@ import type { Preferences } from "@/lib/recommend"
 import { recommendOutfitFromPhoto } from "@/lib/photoStylist"
 import { recommendOutfitWithAi } from "@/lib/outfitStylist"
 import { isConversationConfigured, isVisionConfigured } from "@/lib/aiConfig"
+import { generateTryOnImage, isTryOnConfigured } from "@/lib/tryOn"
 import type { AssistantActions } from "@/components/StylistChat"
 import { Button, Input } from "@/components/ui"
 import { Icon } from "@/components/Icon"
@@ -174,6 +175,8 @@ export default function CustomerShop({
   const [activePhoto, setActivePhoto] = useState<number | null>(null)
   const activeModelSrc = activePhoto !== null && photos[activePhoto] ? photos[activePhoto] : null
   const [previewState, setPreviewState] = useState("idle")
+  const [tryOnImage, setTryOnImage] = useState<string | null>(null)
+  const [tryOnStage, setTryOnStage] = useState("")
   const [photoReco, setPhotoReco] = useState<{
     status: "idle" | "loading" | "error"
     warnings: string[]
@@ -182,6 +185,7 @@ export default function CustomerShop({
   }>({ status: "idle", warnings: [], error: "", note: "" })
   const visionConfigured = isVisionConfigured()
   const conversationConfigured = isConversationConfigured()
+  const tryOnConfigured = isTryOnConfigured()
   const [cartState, setCart] = useState<StoredCartBundle[]>([])
   // Hot reload can retain bundles created before piece selection was added.
   const cart: CartBundle[] = cartState.map((entry) => ({
@@ -450,6 +454,43 @@ export default function CustomerShop({
       })
     }
   }
+  // Real try-on: Magic Hour renders a new photo of the model in the outfit.
+  const runTryOn = async () => {
+    if (!bundle.length) {
+      notify("Add one or more pieces before generating a try-on.")
+      return
+    }
+    if (!tryOnConfigured) {
+      notify("AI try-on needs VITE_MAGIC_API (a Magic Hour key) in .env.")
+      return
+    }
+    setError("")
+    setPreviewState("loading")
+    setTryOnStage("Preparing the model photo…")
+    try {
+      const personPhoto = await toDataUrl(activeModelSrc || image)
+      const result = await generateTryOnImage({
+        personPhoto,
+        garments: bundle,
+        onProgress: setTryOnStage,
+      })
+      setTryOnImage(result.src)
+      setPreviewState("ready")
+      notify(
+        result.skipped.length
+          ? `Try-on ready. Magic Hour cannot swap ${result.skipped.map((p) => p.name).join(", ")}, so those pieces stay as they are.`
+          : "AI try-on ready.",
+      )
+    } catch (cause) {
+      const message =
+        cause instanceof Error ? cause.message : "The AI try-on failed."
+      setPreviewState("idle")
+      setError(message)
+      notify(message)
+    } finally {
+      setTryOnStage("")
+    }
+  }
   const assistantActionsRef = useRef({
     addToOutfit: togglePiece,
     addToCart: addCartItem,
@@ -491,17 +532,13 @@ export default function CustomerShop({
     }, 600)
     return () => clearTimeout(buildTimer.current)
   }, [selected, prefs, products, tab, view])
-  // Live fitting shimmer whenever a fresh outfit lands on the model.
+  // A new outfit or model invalidates the last Magic Hour render.
   useEffect(() => {
-    if (tab !== "outfits" || view !== "collection") return
-    if (!bundle.length) {
-      setPreviewState("idle")
-      return
-    }
-    setPreviewState("loading")
-    previewTimer.current = setTimeout(() => setPreviewState("ready"), 900)
-    return () => clearTimeout(previewTimer.current)
-  }, [bundle, tab, view])
+    clearTimeout(previewTimer.current)
+    setTryOnImage(null)
+    setTryOnStage("")
+    setPreviewState("idle")
+  }, [bundle, activeModelSrc, image])
   return (
     <div className={`customer-storefront shop-storefront ${view === "fitting" ? "has-outfit-dock" : ""}`}>
       <header className="customer-nav">
@@ -598,6 +635,10 @@ export default function CustomerShop({
             previewState={previewState}
             setPreviewState={setPreviewState}
             previewTimer={previewTimer}
+            tryOnStage={tryOnStage}
+            tryOnImage={tryOnImage}
+            tryOnConfigured={tryOnConfigured}
+            runTryOn={runTryOn}
             filtered={filtered}
             category={category}
             setCategory={setCategory}
@@ -633,7 +674,7 @@ export default function CustomerShop({
           />
           </Suspense>
         )}
-        <Footer note="Recommendations use catalogue rules and available stock. Photos stay in this browser; AI fitting and retailer checkout are not connected. Inventory freshness depends on the merchant connection." />
+        <Footer note="Recommendations use catalogue rules and available stock. AI try-on uploads the chosen photos to Magic Hour to render a preview; retailer checkout is not connected. Inventory freshness depends on the merchant connection." />
       </main>
     </div>
   )

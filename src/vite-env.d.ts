@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_GEMINI_API_KEY?: string
   readonly VITE_GEMINI_BASE_URL?: string
   readonly VITE_GEMINI_MODEL?: string
+  readonly VITE_MAGIC_API?: string
 }
 
 interface ImportMeta {

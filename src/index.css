@@ -566,6 +566,7 @@ td small { color: var(--muted); display: block; font-size: 9px; margin-top: 6px;
 .fitting-canvas>img { position: absolute; inset: 0; height: 100%; width: 100%; object-fit: cover; object-position: center 40%; }
 .fitting-canvas>img.uploaded-model { object-fit: contain; object-position: center; padding: var(--space-4); }
 .fitting-canvas>img.full-body-model { object-fit: contain; object-position: center; padding: var(--space-5) var(--space-4) calc(var(--space-6) * 3); }
+.fitting-canvas>img.try-on-model { object-fit: contain; object-position: center; padding: var(--space-4); }
 .canvas-label { position: absolute; top: 22px; left: 22px; background: var(--surface); border-radius: var(--radius-pill); padding: 8px 12px; font-size: 9px; display: flex; align-items: center; gap: 6px; }
 .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--charcoal); }
 .canvas-dock { position: absolute; bottom: 22px; left: 22px; right: 22px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-pill); box-shadow: var(--elevation); padding: 7px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }

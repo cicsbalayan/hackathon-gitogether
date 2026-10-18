@@ -15,6 +15,10 @@ export default function FittingView(props: OutfitPageProps) {
     previewState,
     setPreviewState,
     previewTimer,
+    tryOnStage,
+    tryOnImage,
+    tryOnConfigured,
+    runTryOn,
     photos,
     activePhoto,
     setActivePhoto,
@@ -66,6 +70,8 @@ export default function FittingView(props: OutfitPageProps) {
             label="Complete model · fitted preview"
             lookTitle="Fitted on model"
             lookLabel="Complete model with fitted clothing"
+            tryOnSrc={tryOnImage}
+            stage={tryOnStage}
           />
         </div>
         <section className="outfit-tray">
@@ -74,25 +80,23 @@ export default function FittingView(props: OutfitPageProps) {
           <Button
             className="button primary full"
             disabled={previewState === "loading" || !bundle.length}
-            onClick={() => {
-              setPreviewState("loading")
-              previewTimer.current = setTimeout(
-                () => setPreviewState("ready"),
-                1200,
-              )
-            }}
+            onClick={runTryOn}
           >
             <Icon name="layers" />
             {previewState === "loading"
-              ? "Preparing try-on…"
+              ? "Generating try-on…"
               : bundle.length
                 ? `Virtual try-on · ${bundle.length} ${bundle.length === 1 ? "piece" : "pieces"}`
                 : "Virtual try-on"}
           </Button>
           <p className="studio-disclaimer" role="status">
-            {previewState === "ready"
-              ? "Preview complete. Original image unchanged; no AI rendering."
-              : "Optional local photo preview. Photos are not sent to a server."}
+            {tryOnImage
+              ? "AI try-on generated with Magic Hour from your model photo."
+              : previewState === "loading"
+                ? tryOnStage || "Magic Hour is rendering the try-on…"
+                : tryOnConfigured
+                  ? "Generates an AI fitting of this look. The photos are uploaded to Magic Hour."
+                  : "Add VITE_MAGIC_API to .env to generate an AI try-on."}
           </p>
           <div className="model-thumbs fitting-thumbs" aria-label="Choose a model">
             <button

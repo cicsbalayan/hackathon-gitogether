@@ -12,6 +12,10 @@ type ModelCanvasProps = {
   label: string
   lookTitle: string
   lookLabel: string
+  /** Magic Hour output for the current outfit, shown in place of the model. */
+  tryOnSrc?: string | null
+  /** Progress line while Magic Hour renders the try-on. */
+  stage?: string
 }
 
 /** Body zone for each category so the garment lands where it would be worn. */
@@ -54,21 +58,31 @@ export default function ModelCanvas({
   label,
   lookTitle,
   lookLabel,
+  tryOnSrc = null,
+  stage = "",
 }: ModelCanvasProps) {
   return (
     <div className="fitting-canvas">
       <img
         loading="lazy"
         decoding="async"
-        className={activeModelSrc ? "uploaded-model" : "full-body-model"}
-        src={activeModelSrc || image}
+        className={
+          tryOnSrc
+            ? "try-on-model"
+            : activeModelSrc
+              ? "uploaded-model"
+              : "full-body-model"
+        }
+        src={tryOnSrc || activeModelSrc || image}
         alt={
-          activeModelSrc
-            ? "Your uploaded model photo, not AI rendered"
-            : "Full-body fashion model wearing a black dress, gold belt and heeled boots, not AI rendered"
+          tryOnSrc
+            ? "AI try-on image generated from this outfit"
+            : activeModelSrc
+              ? "Your uploaded model photo, not AI rendered"
+              : "Full-body fashion model wearing a black dress, gold belt and heeled boots, not AI rendered"
         }
       />
-      {bundle.length > 0 && (
+      {bundle.length > 0 && !tryOnSrc && (
         <div className="fit-garments" aria-label="Garments fitted on the model">
           {bundle.map((p) => (
             <FittedGarment key={p.sku} product={p} />
@@ -96,7 +110,7 @@ export default function ModelCanvas({
             <span />
           </div>
           <strong>Preparing your try-on…</strong>
-          <span>Building a glass preview of your look.</span>
+          <span>{stage || "Building a glass preview of your look."}</span>
         </div>
       )}
     </div>

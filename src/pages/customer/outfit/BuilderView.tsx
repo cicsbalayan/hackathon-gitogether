@@ -26,6 +26,10 @@ export default function BuilderView(props: OutfitPageProps) {
     previewState,
     setPreviewState,
     previewTimer,
+    tryOnStage,
+    tryOnImage,
+    tryOnConfigured,
+    runTryOn,
     filtered,
     category,
     setCategory,
@@ -75,6 +79,8 @@ export default function BuilderView(props: OutfitPageProps) {
           label="Model fitter · preview"
           lookTitle="Recommended look"
           lookLabel="Complete look"
+          tryOnSrc={tryOnImage}
+          stage={tryOnStage}
         />
         <Button
           className="button primary full"
@@ -89,11 +95,15 @@ export default function BuilderView(props: OutfitPageProps) {
         <p className="studio-disclaimer" role="status">
           {!bundle.length
             ? "Add one or more pieces and the try-on fits the recommended look on this model."
-            : activeModelSrc
-              ? "Showing your uploaded photo. Photos stay in this browser."
-              : previewState === "ready"
-                ? "Try-on complete. Original image unchanged; no AI rendering."
-                : "Optional local photo preview. Photos are not sent to a server."}
+            : tryOnImage
+              ? "AI try-on generated with Magic Hour from your model photo."
+              : activeModelSrc
+                ? "Showing your uploaded photo. It reaches Magic Hour only when you generate a try-on."
+                : previewState === "loading"
+                  ? tryOnStage || "Magic Hour is rendering the try-on…"
+                  : tryOnConfigured
+                    ? "Open the fitting studio to generate an AI try-on of this look."
+                    : "Add VITE_MAGIC_API to .env to generate an AI try-on."}
         </p>
       </div>
 

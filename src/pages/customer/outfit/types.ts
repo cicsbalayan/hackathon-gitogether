@@ -20,6 +20,10 @@ export type OutfitPageProps = {
   previewState: string
   setPreviewState: Dispatch<SetStateAction<string>>
   previewTimer: MutableRefObject<ReturnType<typeof setTimeout> | undefined>
+  tryOnStage: string
+  tryOnImage: string | null
+  tryOnConfigured: boolean
+  runTryOn: () => void
   filtered: Product[]
   category: string
   setCategory: (category: string) => void
