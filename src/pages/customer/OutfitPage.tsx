@@ -609,7 +609,7 @@ export default function OutfitPage(props: OutfitPageProps) {
                 className="button primary"
                 onClick={() => go("collection")}
               >
-                Browse the collection
+                Browse the builder
                 <Icon name="arrow" />
               </Button>
             </div>
