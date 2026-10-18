@@ -476,9 +476,15 @@ td small { color: var(--muted); display: block; font-size: 9px; margin-top: 6px;
 /* Customer: a full-page atelier, not a merchant modal. */
 .customer-page { min-height: 100dvh; background: var(--surface); }
 .customer-nav { height: 82px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; }
+.customer-nav { position: relative; }
 .atelier-wordmark { display: flex; align-items: baseline; gap: 5px; font-family: Georgia, 'Times New Roman', serif; font-size: 30px; letter-spacing: -1.2px; }
 .atelier-wordmark span { font-size: 16px; letter-spacing: -.4px; }
 .customer-account { display: flex; align-items: center; gap: 24px; }
+.landing-header-nav { position: absolute; left: 50%; display: flex; align-items: center; gap: var(--space-4); margin: 0; transform: translateX(-50%); }
+.landing-header-nav-button { position: relative; padding: 8px 0; color: var(--muted); font-size: var(--text-sm); }
+.landing-header-nav-button::after { position: absolute; right: 0; bottom: 2px; left: 0; height: 2px; border-radius: var(--radius-pill); background: var(--ink); content: ""; opacity: 0; transform: scaleX(.4); transition: opacity 160ms ease-out, transform 160ms ease-out; }
+.landing-header-nav-button:hover, .landing-header-nav-button.active { color: var(--ink); }
+.landing-header-nav-button.active::after { opacity: 1; transform: scaleX(1); }
 .account-name { font-size: 11px; color: var(--muted); max-width: 180px; overflow-wrap: anywhere; }
 .customer-main { max-width: 1440px; padding: var(--space-4) 5% 0; margin: auto; }
 .customer-intro { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 28px; }
@@ -949,6 +955,8 @@ td small { color: var(--muted); display: block; font-size: 9px; margin-top: 6px;
   .atelier-wordmark { font-size: 26px; }
   .atelier-wordmark span { font-size: 13px; }
   .customer-account { gap: 12px; }
+  .landing-header-nav { position: static; order: 3; width: 100%; justify-content: center; margin: 0; transform: none; }
+  .landing-header-nav-button { padding: 4px 0 8px; }
   .account-name { display: none; }
   .customer-main { padding: var(--space-3) 20px 0; }
   .customer-intro { margin-bottom: 22px; }

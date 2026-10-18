@@ -90,6 +90,7 @@ export default function CustomerShop({
   const dispatch = useAppDispatch()
   const [tab, setTab] = useState<ShopTab>("home")
   const [view, setView] = useState<ShopView>("collection")
+  const [landingSection, setLandingSection] = useState("home")
   const [productSku, setProductSku] = useState("")
   useEffect(() => {
     const readLocation = () => {
@@ -241,6 +242,36 @@ export default function CustomerShop({
     window.location.hash = next === "collection" ? "/shop/outfits" : `/shop/outfits/${next}`
     window.scrollTo(0, 0)
   }
+  const openLandingSection = (section: string) => {
+    setTab("home")
+    setView("collection")
+    setLandingSection(section)
+    window.location.hash = "/shop"
+    window.requestAnimationFrame(() => {
+      document.getElementById(section)?.scrollIntoView({ behavior: "smooth" })
+    })
+  }
+  useEffect(() => {
+    if (session || tab !== "home") return
+    const updateLandingSection = () => {
+      const sections = ["home", "about", "team", "links"]
+        .map((id) => document.getElementById(id))
+        .filter((section): section is HTMLElement => Boolean(section))
+      const current = sections.reduce((active, section) => {
+        return section.getBoundingClientRect().top <= window.innerHeight * 0.35
+          ? section.id
+          : active
+      }, "home")
+      setLandingSection(current)
+    }
+    updateLandingSection()
+    window.addEventListener("scroll", updateLandingSection, { passive: true })
+    window.addEventListener("resize", updateLandingSection)
+    return () => {
+      window.removeEventListener("scroll", updateLandingSection)
+      window.removeEventListener("resize", updateLandingSection)
+    }
+  }, [session, tab])
   const isSelected = (product: Product) =>
     selected.some((p) => p.sku === product.sku)
   const togglePiece = (product: Product) => {
@@ -430,11 +461,26 @@ export default function CustomerShop({
       <header className="customer-nav">
         <Button
           className="atelier-wordmark storefront-home"
-          aria-label="Forma — open outfit builder"
-          onClick={() => go("collection")}
+          aria-label={session ? "Forma — open outfit builder" : "Forma — open Home"}
+          onClick={() => (session ? go("collection") : openLandingSection("home"))}
         >
           Forma
         </Button>
+        {!session && tab === "home" && (
+          <nav className="landing-header-nav" aria-label="Landing page">
+            {(["home", "about", "team", "links"] as const).map((section) => (
+              <button
+                key={section}
+                type="button"
+                className={`landing-header-nav-button ${landingSection === section ? "active" : ""}`}
+                aria-current={landingSection === section ? "page" : undefined}
+                onClick={() => openLandingSection(section)}
+              >
+                {section[0].toUpperCase() + section.slice(1)}
+              </button>
+            ))}
+          </nav>
+        )}
         <div className="customer-account">
           {(session || tab !== "home") && (
             <Button
