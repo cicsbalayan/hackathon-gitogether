@@ -142,13 +142,6 @@ export default function OutfitPage(props: OutfitPageProps) {
     signedIn,
     onRequireLogin,
   } = props
-  const openFitting = () => {
-    if (!signedIn) {
-      onRequireLogin()
-      return
-    }
-    go("fitting")
-  }
   const collectionPages = Math.max(1, Math.ceil(filtered.length / 12))
   const outfitRows = (
     <div className="outfit-items">
@@ -198,7 +191,7 @@ export default function OutfitPage(props: OutfitPageProps) {
               <img
                 loading="lazy"
                 decoding="async"
-                className={activeModelSrc ? undefined : "full-body-model"}
+                className={activeModelSrc ? "uploaded-model" : "full-body-model"}
                 src={activeModelSrc || image}
                 alt={
                   activeModelSrc
@@ -207,9 +200,6 @@ export default function OutfitPage(props: OutfitPageProps) {
                 }
               />
               <span className="canvas-label">Model fitter · preview</span>
-              {!activeModelSrc && (
-                <span className="model-credit">Ola Szkolda / Unsplash</span>
-              )}
               {bundle.length > 0 && (
                 <div className="complete-look" aria-label="Complete look">
                   <strong>Recommended look · {bundle.length} {bundle.length === 1 ? "piece" : "pieces"} · {money(total)}</strong>
@@ -221,10 +211,14 @@ export default function OutfitPage(props: OutfitPageProps) {
                 </div>
               )}
               {previewState === "loading" && (
-                <div className="inference-skeleton" role="status">
-                  <div className="skeleton-block" />
-                  <strong>Preparing try-on…</strong>
-                  <span>AI garment rendering is not connected.</span>
+                <div className="try-on-loading" role="status" aria-live="polite">
+                  <div className="try-on-orb" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <strong>Preparing your try-on…</strong>
+                  <span>Building a glass preview of your look.</span>
                 </div>
               )}
             </div>
@@ -454,14 +448,6 @@ export default function OutfitPage(props: OutfitPageProps) {
                 </Button>
                 <Button
                   className="button secondary"
-                  disabled={!bundle.length}
-                  onClick={openFitting}
-                >
-                  Try on
-                  <Icon name="arrow" />
-                </Button>
-                <Button
-                  className="button secondary"
                   disabled={!selected.length}
                   onClick={() => {
                     setSelected([])
@@ -663,7 +649,7 @@ export default function OutfitPage(props: OutfitPageProps) {
                 <img
                   loading="lazy"
                   decoding="async"
-                  className={activeModelSrc ? undefined : "full-body-model"}
+                  className={activeModelSrc ? "uploaded-model" : "full-body-model"}
                   src={activeModelSrc || image}
                   alt={
                     activeModelSrc
@@ -674,11 +660,6 @@ export default function OutfitPage(props: OutfitPageProps) {
                 <span className="canvas-label">
                   Complete model · fitted preview
                 </span>
-                {!activeModelSrc && (
-                  <span className="model-credit">
-                    Ola Szkolda / Unsplash
-                  </span>
-                )}
                 {bundle.length > 0 && (
                   <div className="complete-look" aria-label="Complete model with fitted clothing">
                     <strong>Fitted on model · {bundle.length} {bundle.length === 1 ? "piece" : "pieces"} · {money(total)}</strong>
@@ -690,10 +671,14 @@ export default function OutfitPage(props: OutfitPageProps) {
                   </div>
                 )}
                 {previewState === "loading" && (
-                  <div className="inference-skeleton" role="status">
-                    <div className="skeleton-block" />
-                    <strong>Preparing try-on…</strong>
-                    <span>AI garment rendering is not connected.</span>
+                  <div className="try-on-loading" role="status" aria-live="polite">
+                    <div className="try-on-orb" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                    <strong>Preparing your try-on…</strong>
+                    <span>Building a glass preview of your look.</span>
                   </div>
                 )}
               </div>
