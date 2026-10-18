@@ -270,7 +270,6 @@ export default function ExperienceLanding({
                 >
                   <img loading="lazy" decoding="async" src={model4} alt="Fashion model wearing a styled outfit" />
                   <span className="landing-photo-label">Review your fit.</span>
-                  <small>Ola Szkolda / Unsplash</small>
                 </motion.figure>
               </motion.div>
             </>

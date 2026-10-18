@@ -9,6 +9,7 @@ import type { AssistantActions } from "@/components/StylistChat"
 import { Button, Input } from "@/components/ui"
 import { Icon } from "@/components/Icon"
 import Footer from "@/components/Footer"
+import LoadingScreen from "@/components/LoadingScreen"
 import { useAppDispatch } from "@/lib/hooks"
 import { setCategory as setCategoryAction } from "@/lib/store"
 import type { CartBundle, ShopTab, ShopView } from "@/pages/customer/types"
@@ -36,13 +37,6 @@ async function toDataUrl(src: string): Promise<string> {
 }
 
 const pendingOutfitKey = "forma-pending-outfit-v1"
-
-const LANDING_SECTIONS = [
-  { id: "home", label: "Home" },
-  { id: "about", label: "About" },
-  { id: "team", label: "Team" },
-  { id: "links", label: "Links" },
-] as const
 
 function readPendingOutfit(): { selected: Product[]; bundle: Product[] } | null {
   try {
@@ -95,10 +89,8 @@ export default function CustomerShop({
 }) {
   const dispatch = useAppDispatch()
   const [tab, setTab] = useState<ShopTab>("home")
-  const [activeLandingSection, setActiveLandingSection] = useState<
-    (typeof LANDING_SECTIONS)[number]["id"]
-  >("home")
   const [view, setView] = useState<ShopView>("collection")
+  const [landingSection, setLandingSection] = useState("home")
   const [productSku, setProductSku] = useState("")
   useEffect(() => {
     const readLocation = () => {
@@ -141,30 +133,6 @@ export default function CustomerShop({
     window.addEventListener("hashchange", readLocation)
     return () => window.removeEventListener("hashchange", readLocation)
   }, [])
-  useEffect(() => {
-    if (tab !== "home") return
-
-    const updateActiveSection = () => {
-      const headerOffset = 96
-      const sections = LANDING_SECTIONS.map(({ id }) => ({
-        id,
-        top: document.getElementById(id)?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY,
-      }))
-      const current = sections.reduce(
-        (active, section) => (section.top <= headerOffset ? section.id : active),
-        "home" as (typeof LANDING_SECTIONS)[number]["id"],
-      )
-      setActiveLandingSection((active) => (active === current ? active : current))
-    }
-
-    updateActiveSection()
-    window.addEventListener("scroll", updateActiveSection, { passive: true })
-    window.addEventListener("resize", updateActiveSection)
-    return () => {
-      window.removeEventListener("scroll", updateActiveSection)
-      window.removeEventListener("resize", updateActiveSection)
-    }
-  }, [tab])
   const detailProduct = products.find((p) => p.sku === productSku)
   const openProduct = (p: Product) => {
     setProductSku(p.sku)
@@ -268,28 +236,42 @@ export default function CustomerShop({
     })
     setPreviewState("idle")
   }
-  const goTab = (next: ShopTab) => {
-    setTab(next)
-    window.location.hash = next === "home" ? "/shop" : "/shop/outfits"
-    window.scrollTo(0, 0)
-  }
-  const goLandingSection = (id: (typeof LANDING_SECTIONS)[number]["id"]) => {
-    goTab("home")
-    window.setTimeout(() => {
-      const section = document.getElementById(id)
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      section?.scrollIntoView({
-        behavior: reduceMotion ? "auto" : "smooth",
-        block: "start",
-      })
-    }, 0)
-  }
   const go = (next: ShopView) => {
     setTab("outfits")
     setView(next)
     window.location.hash = next === "collection" ? "/shop/outfits" : `/shop/outfits/${next}`
     window.scrollTo(0, 0)
   }
+  const openLandingSection = (section: string) => {
+    setTab("home")
+    setView("collection")
+    setLandingSection(section)
+    window.location.hash = "/shop"
+    window.requestAnimationFrame(() => {
+      document.getElementById(section)?.scrollIntoView({ behavior: "smooth" })
+    })
+  }
+  useEffect(() => {
+    if (session || tab !== "home") return
+    const updateLandingSection = () => {
+      const sections = ["home", "about", "team", "links"]
+        .map((id) => document.getElementById(id))
+        .filter((section): section is HTMLElement => Boolean(section))
+      const current = sections.reduce((active, section) => {
+        return section.getBoundingClientRect().top <= window.innerHeight * 0.35
+          ? section.id
+          : active
+      }, "home")
+      setLandingSection(current)
+    }
+    updateLandingSection()
+    window.addEventListener("scroll", updateLandingSection, { passive: true })
+    window.addEventListener("resize", updateLandingSection)
+    return () => {
+      window.removeEventListener("scroll", updateLandingSection)
+      window.removeEventListener("resize", updateLandingSection)
+    }
+  }, [session, tab])
   const isSelected = (product: Product) =>
     selected.some((p) => p.sku === product.sku)
   const togglePiece = (product: Product) => {
@@ -479,34 +461,26 @@ export default function CustomerShop({
       <header className="customer-nav">
         <Button
           className="atelier-wordmark storefront-home"
-          aria-label="Forma — home"
-          onClick={() => goTab("home")}
+          aria-label={session ? "Forma — open outfit builder" : "Forma — open Home"}
+          onClick={() => (session ? go("collection") : openLandingSection("home"))}
         >
           Forma
         </Button>
-        <nav className="shop-navigation" aria-label={tab === "home" ? "Landing sections" : "Shop pages"}>
-          {tab === "home"
-            ? LANDING_SECTIONS.map(({ id, label }) => (
-                <Button
-                  key={id}
-                  className={activeLandingSection === id ? "active" : ""}
-                  aria-current={activeLandingSection === id ? "true" : undefined}
-                  onClick={() => goLandingSection(id)}
-                >
-                  {label}
-                </Button>
-              ))
-            : (["home", "outfits"] as const).map((t) => (
-                <Button
-                  key={t}
-                  className={tab === t ? "active" : ""}
-                  aria-pressed={tab === t}
-                  onClick={() => goTab(t)}
-                >
-                  {t === "home" ? "Home" : "Outfits"}
-                </Button>
-              ))}
-        </nav>
+        {!session && tab === "home" && (
+          <nav className="landing-header-nav" aria-label="Landing page">
+            {(["home", "about", "team", "links"] as const).map((section) => (
+              <button
+                key={section}
+                type="button"
+                className={`landing-header-nav-button ${landingSection === section ? "active" : ""}`}
+                aria-current={landingSection === section ? "page" : undefined}
+                onClick={() => openLandingSection(section)}
+              >
+                {section[0].toUpperCase() + section.slice(1)}
+              </button>
+            ))}
+          </nav>
+        )}
         <div className="customer-account">
           {(session || tab !== "home") && (
             <Button
@@ -554,12 +528,12 @@ export default function CustomerShop({
       />
       <main className="customer-main">
         {tab === "home" && (
-          <Suspense fallback={<div className="import-placeholder" role="status">Loading…</div>}>
+          <Suspense fallback={<LoadingScreen />}>
             <HomePage onStartBuilder={() => { go("collection") }} />
           </Suspense>
         )}
         {tab === "outfits" && (
-          <Suspense fallback={<div className="import-placeholder" role="status">Loading…</div>}>
+          <Suspense fallback={<LoadingScreen />}>
           <OutfitPage
             products={products}
             image={image}

@@ -1,7 +1,6 @@
 import { Button, Heading, Select } from "@/components/ui"
 import { Icon } from "@/components/Icon"
 import PanelTitle from "@/components/PanelTitle"
-import ExperienceLanding from "@/components/ExperienceLanding"
 import { productSizes, variantStock } from "@/lib/catalogue"
 import type { Catalogue, Product } from "@/lib/catalogue"
 
@@ -32,19 +31,12 @@ export default function HomeDashboard({
   const availability = variantStatuses.length
     ? `${((variantStatuses.filter(Boolean).length / variantStatuses.length) * 100).toFixed(1)}%`
     : "—"
-  const scrollToMetrics = () =>
-    document.getElementById("admin-metrics")?.scrollIntoView({ behavior: "smooth" })
   return (
     <>
-      <ExperienceLanding
-        audience="merchant"
-        productCount={products.length}
-        source={sourceLabel}
-        Icon={Icon}
-        onPrimary={onOpenInventory}
-        onSecondary={scrollToMetrics}
-      />
-      <div id="admin-metrics" className="section-toolbar period-only">
+      <div className="admin-home-toolbar">
+        <div>
+          <Heading level={2}>Performance overview</Heading>
+        </div>
         <Select
           aria-label="Reporting period"
           value={period}
@@ -212,6 +204,9 @@ export default function HomeDashboard({
               ? "Read-only API snapshot · manual refresh"
               : "No live API connection"}
           </div>
+          <Button className="button primary admin-manage-inventory" onClick={onOpenInventory}>
+            Manage inventory <Icon name="catalogue" />
+          </Button>
         </section>
       </div>
       <section className="panel affinity-panel">

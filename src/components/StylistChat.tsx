@@ -212,7 +212,7 @@ export default function StylistChat({
               className="stylist-panel"
               role="dialog"
               aria-modal="true"
-              aria-label="Forma stylist"
+              aria-label="Forma Stylist"
               onMouseDown={(event) => event.stopPropagation()}
             >
               <header className="stylist-header">
@@ -220,8 +220,7 @@ export default function StylistChat({
                   f.
                 </span>
                 <div className="stylist-heading">
-                  <Heading level={2}>Forma stylist</Heading>
-                  <p>Grounded on your catalogue · in stock only</p>
+                  <Heading level={2}>Forma Stylist</Heading>
                 </div>
                 <Button
                   className="icon-button stylist-close"
@@ -237,6 +236,11 @@ export default function StylistChat({
                     key={entry.id}
                     className={`stylist-message stylist-${entry.role}`}
                   >
+                    {entry.role === "assistant" ? (
+                      <span className="stylist-avatar" aria-hidden="true">
+                        f.
+                      </span>
+                    ) : null}
                     <p>{entry.content}</p>
                     {entry.items?.length ? renderItems(entry.items) : null}
                   </div>
@@ -257,6 +261,9 @@ export default function StylistChat({
                 )}
                 {sending && (
                   <div className="stylist-message stylist-assistant stylist-typing">
+                    <span className="stylist-avatar" aria-hidden="true">
+                      f.
+                    </span>
                     <span className="stylist-dots" aria-label="Styling…">
                       <i />
                       <i />
@@ -296,7 +303,7 @@ export default function StylistChat({
                   aria-label="Send message"
                   disabled={!configured || sending || !input.trim()}
                 >
-                  <Icon name="arrow" />
+                  <Icon name="airplane" />
                 </Button>
               </form>
               <p className="stylist-note">
