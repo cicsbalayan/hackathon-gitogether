@@ -62,6 +62,26 @@ export default function ProjectLanding({ onStartBuilder }: Props) {
     cards.forEach((card) => observer.observe(card))
     return () => observer.disconnect()
   }, [])
+  useEffect(() => {
+    const cards = document.querySelectorAll<HTMLElement>(".landing-link-card")
+    if (typeof IntersectionObserver === "undefined") {
+      cards.forEach((card) => card.classList.add("is-visible"))
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible")
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.2 },
+    )
+    cards.forEach((card) => observer.observe(card))
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <>

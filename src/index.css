@@ -1545,6 +1545,10 @@ td { padding-block: var(--space-3); font-size: var(--text-sm); }
   overflow: hidden;
   transition: transform var(--motion) var(--motion-ease), border-color var(--motion) var(--motion-ease), box-shadow var(--motion) var(--motion-ease);
 }
+.landing-link-card { opacity: 0; transform: translateY(24px) scale(.97); transition: opacity 620ms cubic-bezier(0.23, 1, 0.32, 1), transform 620ms cubic-bezier(0.23, 1, 0.32, 1), border-color var(--motion) var(--motion-ease), box-shadow var(--motion) var(--motion-ease); }
+.landing-link-card.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.landing-link-card:nth-child(2) { transition-delay: 110ms; }
+.landing-link-card:nth-child(3) { transition-delay: 220ms; }
 .landing-link-card::after {
   position: absolute;
   right: -52px;
@@ -1587,7 +1591,7 @@ td { padding-block: var(--space-3); font-size: var(--text-sm); }
   .landing-team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .landing-team-card { opacity: 1; transform: none; transition: none; }
+  .landing-team-card, .landing-link-card { opacity: 1; transform: none; transition: none; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .landing-about-stack .landing-info-card:nth-child(1) { transform: rotate(-1deg); }
