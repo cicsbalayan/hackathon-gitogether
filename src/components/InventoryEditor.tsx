@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { ComponentType } from "react"
 import { Button, Form, Heading, Input, Select } from "./ui"
-import { safeImageUrl } from "../lib/catalogue"
+import { safeProductImage } from "../lib/catalogue"
 import { classificationCategories } from "../lib/classification"
 import type { Product } from "../lib/catalogue"
 
@@ -44,12 +44,15 @@ export default function InventoryEditor({ product, apiConnected, Icon, onSave, o
     if (!variants.length || sizes.some((size) => !/^[A-Z0-9][A-Z0-9 ./_-]{0,15}$/.test(size)) || new Set(sizes).size !== sizes.length) return setError("Provide at least one valid size. Each size must be unique.")
     if (variants.some((variant) => !/^\d+$/.test(variant.stock) || Number(variant.stock) > 1000000) || total > 1000000) return setError("Stock must be a whole number, with no more than 1,000,000 units in total.")
     if (color.trim().length > 80) return setError("Color must be at most 80 characters.")
-    if (image.trim() && !safeImageUrl(image.trim())) return setError("Use a valid HTTP(S) image URL without credentials, or leave it empty.")
+    if (image.trim() && !safeProductImage(image.trim()))
+      return setError(
+        "Use a valid HTTP(S) image URL without credentials, a base64 image from this tab, or leave it empty.",
+      )
     if (apiConnected && !confirmManual) return setError("Confirm switching to manual inventory management before saving.")
     const next: Product = {
       name: name.trim(), sku: normalizedSku, category, price: Number(price), color: color.trim(),
       stock: total, variants: Object.fromEntries(variants.map((variant, index) => [sizes[index], Number(variant.stock)])),
-      ...(image.trim() ? { imageUrl: safeImageUrl(image.trim())! } : {}), origin: "Manual",
+      ...(image.trim() ? { imageUrl: safeProductImage(image.trim())! } : {}), origin: "Manual",
     }
     if (!onSave(next)) setError("Could not save inventory in this browser. Your previous stock is unchanged.")
   }
